@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from mcp_capguard import CapabilityProfile, CapabilityViolation
-from tests.fake_server import SyncStringServer
+from fake_server import SyncStringServer
 
 
 class TestCapabilityProfileCheck:
