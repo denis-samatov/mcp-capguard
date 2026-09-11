@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import pytest
+from fake_server import AsyncToolObjectServer, FakeTool, SyncStringServer, WrappedServer
 
 from mcp_capguard import CapabilityViolation, assert_capability_boundary, get_exposed_tool_names
-from fake_server import AsyncToolObjectServer, FakeTool, SyncStringServer, WrappedServer
 
 
 class TestAssertCapabilityBoundary:
