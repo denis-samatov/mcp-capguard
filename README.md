@@ -1,6 +1,7 @@
 # mcp-capguard
 
 [![CI](https://github.com/denis-samatov/mcp-capguard/actions/workflows/ci.yml/badge.svg)](https://github.com/denis-samatov/mcp-capguard/actions/workflows/ci.yml)
+[![M8ven Score](https://m8ven.ai/badge/mcp/denis-samatov/mcp-capguard)](https://m8ven.ai/mcp/denis-samatov/mcp-capguard)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 
@@ -160,6 +161,12 @@ capguard check --profiles conftest:capguard_profiles
 - **YAML-driven settings construction.** Real `Settings` classes carry
   secrets and validators that don't round-trip through YAML safely; you
   construct them in Python, same as any other test fixture.
+
+## Independent trust scan
+
+`mcp-capguard` is listed in the [M8ven Trust Index](https://m8ven.ai/mcp/denis-samatov/mcp-capguard). M8ven's automated assessment currently reports **no concerning findings**, including no detected credential exfiltration, sensitive-file access, or code obfuscation. The badge at the top of this README updates automatically with the live M8ven score.
+
+This is an independent automated assessment, not a formal security certification.
 
 ## License
 
