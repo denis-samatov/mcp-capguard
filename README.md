@@ -1,9 +1,6 @@
 # mcp-capguard
 
 [![CI](https://github.com/denis-samatov/mcp-capguard/actions/workflows/ci.yml/badge.svg)](https://github.com/denis-samatov/mcp-capguard/actions/workflows/ci.yml)
-[![M8ven Score](https://m8ven.ai/badge/mcp/denis-samatov/mcp-capguard)](https://m8ven.ai/mcp/denis-samatov/mcp-capguard)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 
 **Assert that a configuration profile exposes exactly the MCP tools it
 should — and none it shouldn't.** A pytest plugin for permission/capability
@@ -12,15 +9,6 @@ boundaries, not schema drift.
 ```python
 def test_readonly_hides_destructive_tools(capguard_profile):
     capguard_profile.check_sync()
-```
-
-```text
-readonly
-  ✓ 18 expected tool(s) exposed
-  ✗ delete_document unexpectedly exposed
-
-SECURITY REGRESSION
-  readonly → delete_document
 ```
 
 ## The problem this solves
@@ -33,34 +21,21 @@ read-only. Nothing throws. The agent just gets a tool it shouldn't have.
 capguard turns that into a CI failure, checked fresh on every run — no
 prior snapshot required.
 
-## Why not `mcpward` or `covenant-mcp`?
+## Scope
 
-Both are good tools, solving a **different** problem: single-server drift
-over time. You snapshot a server's contract today; they tell you if it
-changed tomorrow.
-
-| | `mcpward` | `covenant-mcp` | `mcp-capguard` |
-|---|---|---|---|
-| Question answered | did this tool's schema/behavior change since baseline? | did this tool's contract silently break callers? | does *this configuration* currently violate *this policy*? |
-| Needs a prior snapshot | yes | yes | no |
-| Multi-profile aware | no | no | yes — the whole point |
-| Runtime | Node.js (npm) | Python (black-box, subprocess) | Python (in-process) |
-| Interface | CLI | CLI | pytest plugin + CLI |
-
-If you want "did anything change," use one of those. If you want "does my
-`read_only=True` config actually have zero destructive tools, right now,"
-that's what capguard checks — and it's the exact pattern
+capguard checks a declared tool policy against each configuration profile at
+test time. It does not compare a server to a previous snapshot or check tool
+schemas or behavior. The permission test follows the same pattern as
 [`check_tool_matrix.py`](https://github.com/denis-samatov/yandex-workspace-mcp/blob/main/scripts/check_tool_matrix.py)
-in `yandex-workspace-mcp` already runs by hand in production. This library
-is that script, generalized.
+in `yandex-workspace-mcp`; this library makes that pattern reusable.
 
 ## How it works
 
 capguard is **in-process only** in this release: it imports your server
 factory and calls it directly with different settings objects, the same way
 your own test suite would. No subprocess spawning, no stdio/HTTP transport
-— just a function call per profile, so a full multi-profile check runs in
-milliseconds.
+— just a function call per profile. Runtime depends on your server factory and
+its tool-listing implementation.
 
 Your server only needs to satisfy one contract:
 
@@ -74,10 +49,22 @@ factory returns a wrapper object (e.g. an `Application` whose real server
 lives at `.mcp_server`), pass `accessor=lambda app: app.mcp_server` — explicit,
 not guessed.
 
-## Install
+## Install from source
+
+Clone the repository and install it in a virtual environment:
 
 ```bash
-pip install mcp-capguard
+git clone https://github.com/denis-samatov/mcp-capguard.git
+cd mcp-capguard
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+python -m pip install -e .
+```
+
+The optional FastMCP example needs the development dependencies:
+
+```bash
+python -m pip install -e '.[dev]'
 ```
 
 ## Quick start
@@ -162,11 +149,6 @@ capguard check --profiles conftest:capguard_profiles
   secrets and validators that don't round-trip through YAML safely; you
   construct them in Python, same as any other test fixture.
 
-## Independent trust scan
-
-`mcp-capguard` is listed in the [M8ven Trust Index](https://m8ven.ai/mcp/denis-samatov/mcp-capguard). M8ven's automated assessment currently reports **no concerning findings**, including no detected credential exfiltration, sensitive-file access, or code obfuscation. The badge at the top of this README updates automatically with the live M8ven score.
-
-This is an independent automated assessment, not a formal security certification.
 
 ## License
 
