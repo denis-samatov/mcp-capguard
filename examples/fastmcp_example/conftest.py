@@ -1,6 +1,6 @@
-from mcp_capguard import CapabilityProfile
-
 from server import Settings, create_server
+
+from mcp_capguard import CapabilityProfile
 
 
 def capguard_profiles() -> list[CapabilityProfile]:

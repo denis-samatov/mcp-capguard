@@ -17,8 +17,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: pip install -e ".[dev]"
-      - run: ruff check src tests
-      - run: ruff format --check src tests
+      - run: ruff check src tests examples/fastmcp_example
+      - run: ruff format --check src tests examples/fastmcp_example
       - run: mypy src/mcp_capguard
       - run: pytest -q
       - name: Run the FastMCP example (dogfooding)

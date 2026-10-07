@@ -1,7 +1,7 @@
 [project]
 name = "mcp-capguard"
-version = "0.1.0"
-description = "Assert that an MCP server's configuration profile exposes exactly the tools it should, and none it shouldn't — a permission/capability boundary tester, not a schema-drift tool."
+version = "0.1.1"
+description = "Test required and forbidden MCP tool exposure for each configuration profile with pytest or a CLI."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -25,7 +25,7 @@ capguard = "mcp_capguard.cli:main"
 dev = [
     "pytest>=8.3.0",
     "pytest-asyncio>=0.24.0",
-    "mcp[cli]>=1.0.0",
+    "mcp[cli]>=2.0.0",
     "ruff>=0.6.0",
     "mypy>=1.11.0",
     "build>=1.2",
