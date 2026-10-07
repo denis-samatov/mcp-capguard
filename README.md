@@ -35,6 +35,21 @@ The normal demo exits `0`; the `--leak-delete` demo exits `1` and names `delete_
 Run these from the repository root after cloning it. No API keys or running
 server are needed.
 
+## Pilots with real servers
+
+Two reproducible examples exercise actual upstream factories with pinned commits:
+
+- [Yandex Workspace MCP](examples/yandex_workspace_pilot/README.md): MCP SDK 2.3.0,
+  readonly, editor without deletion, and disabled services.
+- [MCP Atlassian](examples/mcp_atlassian_pilot/README.md): FastMCP 3.4.8 / MCP SDK 1.30.0,
+  readonly, readwrite, and a two-tool allowlist, using an in-memory client adapter
+  to include request-time tool filtering.
+
+Each pilot runs in its own Python 3.12 environment, checks three profiles, and
+proves the same policy rejects an intentionally enabled write capability.
+Their pytest runs block TCP sockets and require no real credentials. These are
+compatibility examples, not evidence of independent upstream adoption.
+
 ## Scope
 
 capguard checks a declared tool policy against each configuration profile at
@@ -54,6 +69,10 @@ factory and calls it directly with different settings objects, the same way
 your own test suite would. No subprocess spawning, no stdio/HTTP transport
 — just a function call per profile. Runtime depends on your server factory and
 its tool-listing implementation.
+
+If filtering happens at request time, use a `list_tools()` adapter that retrieves
+the client-visible list. The Atlassian pilot demonstrates this with an in-memory
+FastMCP Client. Listing an unfiltered internal registry would test the wrong boundary.
 
 Your server only needs to satisfy one contract:
 

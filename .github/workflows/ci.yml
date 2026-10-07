@@ -17,10 +17,42 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: pip install -e ".[dev]"
-      - run: ruff check src tests examples/fastmcp_example
-      - run: ruff format --check src tests examples/fastmcp_example
+      - run: ruff check src tests examples
+      - run: ruff format --check src tests examples
       - run: mypy src/mcp_capguard
       - run: pytest -q
       - name: Run the FastMCP example (dogfooding)
         working-directory: examples/fastmcp_example
         run: pytest -v
+
+  real-server-pilots:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pilot: [yandex_workspace_pilot, mcp_atlassian_pilot]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - run: python -m pip install uv
+      - name: Install isolated server dependencies
+        run: uv pip install --system --python python -e . -r examples/${{ matrix.pilot }}/requirements.txt
+      - name: Check profiles and reject intentional write exposure without TCP access
+        working-directory: examples/${{ matrix.pilot }}
+        run: python -m pytest -v
+      - name: Verify passing and failing CLI exit codes
+        working-directory: examples/${{ matrix.pilot }}
+        run: |
+          capguard check --profiles profiles:capguard_profiles
+          python - <<'PY'
+          import subprocess
+          result = subprocess.run(
+              ["capguard", "check", "--profiles", "profiles:leaking_profiles"],
+              capture_output=True, text=True, timeout=60,
+          )
+          print(result.stdout, result.stderr)
+          assert result.returncode == 1, result.returncode
+          assert "unexpectedly exposed" in result.stdout + result.stderr
+          PY
