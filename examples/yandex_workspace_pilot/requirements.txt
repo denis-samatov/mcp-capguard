@@ -1,0 +1,3 @@
+yandex-workspace-mcp @ git+https://github.com/denis-samatov/yandex-workspace-mcp.git@9146882088ed8528e5d245337ea27d0c6d570c97
+mcp==2.3.0
+pytest-socket==0.8.0

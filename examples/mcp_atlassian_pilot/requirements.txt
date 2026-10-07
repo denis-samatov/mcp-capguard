@@ -1,0 +1,4 @@
+mcp-atlassian @ git+https://github.com/sooperset/mcp-atlassian.git@0a5d2427144d72f5aade07d4fabd385421cec401
+fastmcp==3.4.8
+mcp==1.30.0
+pytest-socket==0.8.0
