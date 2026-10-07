@@ -92,6 +92,19 @@ factory returns a wrapper object (e.g. an `Application` whose real server
 lives at `.mcp_server`), pass `accessor=lambda app: app.mcp_server` — explicit,
 not guessed.
 
+## Install a released wheel
+
+Install the [v0.1.2 release](https://github.com/denis-samatov/mcp-capguard/releases/tag/v0.1.2)
+without cloning the repository:
+
+```bash
+python -m pip install 'https://github.com/denis-samatov/mcp-capguard/releases/download/v0.1.2/mcp_capguard-0.1.2-py3-none-any.whl'
+capguard --help
+```
+
+The wheel includes `py.typed` for consumer type checking. Your existing server
+project supplies its own MCP SDK; capguard's runtime package does not require one.
+
 ## Install from source
 
 For an existing server project, install directly from GitHub in one command:
@@ -103,9 +116,9 @@ python -m pip install 'mcp-capguard @ git+https://github.com/denis-samatov/mcp-c
 This tracks the default branch. For reproducible CI, pin a reviewed commit SHA
 with `@<commit-sha>` after `.git`. A PyPI release is not yet advertised here.
 
-Current source includes the `py.typed` marker so mypy can check capguard's public
-annotations in consumer projects. The previously published v0.1.1 release assets
-predate this packaging fix; use a reviewed source commit for this typing support.
+Source and v0.1.2 release assets include the `py.typed` marker so mypy can check
+capguard's public annotations in consumer projects. The older v0.1.1 release
+assets predate this packaging fix.
 
 Clone the repository and install it in a virtual environment:
 

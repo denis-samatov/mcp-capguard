@@ -1,6 +1,6 @@
 [project]
 name = "mcp-capguard"
-version = "0.1.1"
+version = "0.1.2"
 description = "Test required and forbidden MCP tool exposure for each configuration profile with pytest or a CLI."
 readme = "README.md"
 requires-python = ">=3.10"

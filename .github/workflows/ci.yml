@@ -42,7 +42,9 @@ jobs:
               subprocess.run([str(python), "-m", "pip", "install", str(wheel), "mypy"], check=True)
               consumer = root / "consumer.py"
               consumer.write_text(
-                  "from mcp_capguard import CapabilityProfile, CapabilityViolation\n"
+                  "from importlib.metadata import version\n"
+                  "from mcp_capguard import CapabilityProfile, CapabilityViolation, __version__\n"
+                  "assert __version__ == version('mcp-capguard')\n"
                   "def verify(profile: CapabilityProfile) -> None:\n"
                   "    try:\n"
                   "        profile.check_sync()\n"
@@ -53,6 +55,7 @@ jobs:
                   [str(python), "-m", "mypy", "--no-incremental", str(consumer)],
                   cwd=root, check=True,
               )
+              subprocess.run([str(python), str(consumer)], cwd=root, check=True)
           PY
 
   real-server-pilots:
