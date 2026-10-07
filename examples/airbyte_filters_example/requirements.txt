@@ -1,0 +1,4 @@
+fastmcp-extensions @ git+https://github.com/airbytehq/fastmcp-extensions.git@b9d5754f2c36831055de373c1a77e15e306caf99
+fastmcp==4.0.9
+mcp==2.2.0
+pytest-socket==0.8.1
