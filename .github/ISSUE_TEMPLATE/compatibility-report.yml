@@ -1,0 +1,45 @@
+name: Compatibility report
+description: Share a pilot result, installation problem, or integration with your MCP server.
+title: "[Compatibility]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for trying capguard. A successful run or a reproducible failure helps
+        improve the examples. Use synthetic settings and omit tokens, private URLs,
+        and production data from pasted output.
+  - type: input
+    id: server
+    attributes:
+      label: Server and revision
+      description: Name and version or commit; a public repository URL is optional.
+      placeholder: "MCP Atlassian, commit 0a5d242..."
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Python, capguard, MCP SDK and framework versions, plus operating system.
+      placeholder: "Python 3.12, capguard 0.1.1, MCP 1.30.0, FastMCP 3.4.8, Linux"
+    validations:
+      required: true
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: Outcome
+      options:
+        - Reproduced a pinned pilot successfully
+        - Integrated capguard into my own server tests
+        - Installation failed
+        - Tool listing or policy check failed
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Commands and result
+      description: Include the configuration profile, expected outcome, exit code and sanitized output.
+      placeholder: "Command: ...\nProfile: ...\nExpected: ...\nActual / exit code: ..."
+    validations:
+      required: true
