@@ -51,6 +51,9 @@ Their pytest runs block TCP sockets and require no real credentials. These are
 compatibility examples, not evidence of independent upstream adoption.
 
 Read the [practical write-up on choosing the client-visible boundary](docs/client-visible-tools.md).
+For two additional adapters and a three-project reproduction shortlist, see
+[external reproduction scenarios](docs/external-reproductions.md): real Gmail/Drive
+tools from Google Workspace MCP and Airbyte's filter library with local stub tools.
 If you reproduce a pilot or try capguard on your own server,
 [share a compatibility report](https://github.com/denis-samatov/mcp-capguard/issues/new?template=compatibility-report.yml)
 with your versions, command and outcome. Successful runs and installation failures
@@ -70,11 +73,11 @@ replace runtime authorization tests.
 
 ## How it works
 
-capguard is **in-process only** in this release: it imports your server
-factory and calls it directly with different settings objects, the same way
-your own test suite would. No subprocess spawning, no stdio/HTTP transport
-— just a function call per profile. Runtime depends on your server factory and
-its tool-listing implementation.
+capguard imports your server factory and calls it directly with different settings
+objects, the same way your own test suite would. Its core provides no process or
+transport management. A custom `list_tools()` adapter can isolate an upstream
+server in a worker, as the Google Workspace example does for its global registry.
+Runtime depends on your factory and its tool-listing implementation.
 
 If filtering happens at request time, use a `list_tools()` adapter that retrieves
 the client-visible list. The Atlassian pilot demonstrates this with an in-memory

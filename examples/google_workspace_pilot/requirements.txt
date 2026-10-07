@@ -1,0 +1,4 @@
+workspace-mcp @ git+https://github.com/taylorwilsdon/google_workspace_mcp.git@8f4670ef8ad45f749660079da26eb8e394f6f9fa
+fastmcp==4.0.10
+mcp==2.2.0
+pytest-socket==0.8.1
