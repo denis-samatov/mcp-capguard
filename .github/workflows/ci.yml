@@ -24,6 +24,36 @@ jobs:
       - name: Run the FastMCP example (dogfooding)
         working-directory: examples/fastmcp_example
         run: pytest -v
+      - name: Check typed wheel from an external consumer
+        if: matrix.python-version == '3.12'
+        run: |
+          python -m build --wheel
+          python - <<'PY'
+          import pathlib
+          import subprocess
+          import tempfile
+          import venv
+
+          wheel = next(pathlib.Path("dist").glob("*.whl")).resolve()
+          with tempfile.TemporaryDirectory() as directory:
+              root = pathlib.Path(directory)
+              venv.create(root / "venv", with_pip=True)
+              python = root / "venv" / "bin" / "python"
+              subprocess.run([str(python), "-m", "pip", "install", str(wheel), "mypy"], check=True)
+              consumer = root / "consumer.py"
+              consumer.write_text(
+                  "from mcp_capguard import CapabilityProfile, CapabilityViolation\n"
+                  "def verify(profile: CapabilityProfile) -> None:\n"
+                  "    try:\n"
+                  "        profile.check_sync()\n"
+                  "    except CapabilityViolation as exc:\n"
+                  "        print(exc.forbidden)\n"
+              )
+              subprocess.run(
+                  [str(python), "-m", "mypy", "--no-incremental", str(consumer)],
+                  cwd=root, check=True,
+              )
+          PY
 
   real-server-pilots:
     runs-on: ubuntu-latest

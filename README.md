@@ -50,6 +50,12 @@ proves the same policy rejects an intentionally enabled write capability.
 Their pytest runs block TCP sockets and require no real credentials. These are
 compatibility examples, not evidence of independent upstream adoption.
 
+Read the [practical write-up on choosing the client-visible boundary](docs/client-visible-tools.md).
+If you reproduce a pilot or try capguard on your own server,
+[share a compatibility report](https://github.com/denis-samatov/mcp-capguard/issues/new?template=compatibility-report.yml)
+with your versions, command and outcome. Successful runs and installation failures
+are both useful.
+
 ## Scope
 
 capguard checks a declared tool policy against each configuration profile at
@@ -96,6 +102,10 @@ python -m pip install 'mcp-capguard @ git+https://github.com/denis-samatov/mcp-c
 
 This tracks the default branch. For reproducible CI, pin a reviewed commit SHA
 with `@<commit-sha>` after `.git`. A PyPI release is not yet advertised here.
+
+Current source includes the `py.typed` marker so mypy can check capguard's public
+annotations in consumer projects. The previously published v0.1.1 release assets
+predate this packaging fix; use a reviewed source commit for this typing support.
 
 Clone the repository and install it in a virtual environment:
 
