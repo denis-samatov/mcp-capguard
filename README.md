@@ -2,9 +2,8 @@
 
 [![CI](https://github.com/denis-samatov/mcp-capguard/actions/workflows/ci.yml/badge.svg)](https://github.com/denis-samatov/mcp-capguard/actions/workflows/ci.yml)
 
-**Assert that a configuration profile exposes exactly the MCP tools it
-should — and none it shouldn't.** A pytest plugin for permission/capability
-boundaries, not schema drift.
+**Test required and forbidden MCP tools for each configuration profile.**
+A pytest plugin for permission/capability boundaries.
 
 ```python
 def test_readonly_hides_destructive_tools(capguard_profile):
@@ -21,6 +20,21 @@ read-only. Nothing throws. The agent just gets a tool it shouldn't have.
 capguard turns that into a CI failure, checked fresh on every run — no
 prior snapshot required.
 
+## See the regression in one minute
+
+The [runnable MCP SDK demo](examples/fastmcp_example/README.md) shows a passing
+readonly profile and the same policy rejecting an intentionally leaked delete tool:
+
+```bash
+python -m pip install -e '.[dev]'
+python examples/fastmcp_example/demo.py
+python examples/fastmcp_example/demo.py --leak-delete
+```
+
+The normal demo exits `0`; the `--leak-delete` demo exits `1` and names `delete_document`.
+Run these from the repository root after cloning it. No API keys or running
+server are needed.
+
 ## Scope
 
 capguard checks a declared tool policy against each configuration profile at
@@ -28,6 +42,10 @@ test time. It does not compare a server to a previous snapshot or check tool
 schemas or behavior. The permission test follows the same pattern as
 [`check_tool_matrix.py`](https://github.com/denis-samatov/yandex-workspace-mcp/blob/main/scripts/check_tool_matrix.py)
 in `yandex-workspace-mcp`; this library makes that pattern reusable.
+
+Only declared requirements and prohibitions are checked. An undeclared tool is
+allowed; keep the policy current when adding tools. Tool exposure checks do not
+replace runtime authorization tests.
 
 ## How it works
 
@@ -50,6 +68,15 @@ lives at `.mcp_server`), pass `accessor=lambda app: app.mcp_server` — explicit
 not guessed.
 
 ## Install from source
+
+For an existing server project, install directly from GitHub in one command:
+
+```bash
+python -m pip install 'mcp-capguard @ git+https://github.com/denis-samatov/mcp-capguard.git'
+```
+
+This tracks the default branch. For reproducible CI, pin a reviewed commit SHA
+with `@<commit-sha>` after `.git`. A PyPI release is not yet advertised here.
 
 Clone the repository and install it in a virtual environment:
 
@@ -143,8 +170,7 @@ capguard check --profiles conftest:capguard_profiles
   the way `mcpward`/`covenant-mcp` do — deliberately out of scope for this
   release. It's a different mechanism (subprocess + protocol handshake per
   profile) and would dilute the one thing this tool does well.
-- **Schema-drift detection.** Not the goal here — see the comparison table
-  above.
+- **Schema-drift detection.** This release checks tool exposure policies only.
 - **YAML-driven settings construction.** Real `Settings` classes carry
   secrets and validators that don't round-trip through YAML safely; you
   construct them in Python, same as any other test fixture.
