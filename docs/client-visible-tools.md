@@ -18,7 +18,7 @@ the published capguard 0.1.1 runtime without core changes.
 
 These counts describe the pinned revisions. The policies assert explicitly
 required and forbidden names, not counts or snapshots. An undeclared tool remains
-allowed, so maintain the policy when adding tools.
+allowed unless the profile sets `strict=True`, so maintain the policy when adding tools.
 
 ### Registration-time filtering
 

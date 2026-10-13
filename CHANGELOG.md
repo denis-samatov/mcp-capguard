@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Add an opt-in strict mode (`CapabilityProfile(strict=True)` /
+  `assert_capability_boundary(..., strict=True)`) that treats `must_expose` as a
+  closed allowlist and reports undeclared exposed tools separately. Default
+  behavior is unchanged.
+
 ## 0.1.2
 
 - Include the PEP 561 `py.typed` marker so consumer projects can type-check

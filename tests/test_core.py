@@ -50,6 +50,47 @@ class TestAssertCapabilityBoundary:
         assert "delete unexpectedly exposed" in message
 
 
+class TestStrictMode:
+    def test_default_mode_allows_undeclared_tools(self) -> None:
+        assert_capability_boundary({"search", "export"}, must_expose={"search"})
+
+    def test_strict_passes_when_exposed_tools_are_all_required(self) -> None:
+        assert_capability_boundary(
+            {"search", "read"},
+            must_expose={"search", "read"},
+            must_not_expose={"delete"},
+            strict=True,
+        )
+
+    def test_strict_raises_on_undeclared_tool(self) -> None:
+        with pytest.raises(CapabilityViolation) as exc_info:
+            assert_capability_boundary(
+                {"search", "export"},
+                must_expose={"search"},
+                strict=True,
+                profile_name="readonly",
+            )
+        assert exc_info.value.undeclared == {"export"}
+        assert exc_info.value.missing == set()
+        assert exc_info.value.forbidden == set()
+        assert "export exposed but not declared" in str(exc_info.value)
+
+    def test_strict_reports_forbidden_tool_once_as_forbidden(self) -> None:
+        with pytest.raises(CapabilityViolation) as exc_info:
+            assert_capability_boundary(
+                {"search", "delete"},
+                must_expose={"search"},
+                must_not_expose={"delete"},
+                strict=True,
+            )
+        assert exc_info.value.forbidden == {"delete"}
+        assert exc_info.value.undeclared == set()
+
+    def test_violation_without_undeclared_argument_defaults_to_empty(self) -> None:
+        violation = CapabilityViolation(missing=set(), forbidden={"delete"}, exposed={"delete"})
+        assert violation.undeclared == set()
+
+
 class TestGetExposedToolNames:
     async def test_sync_list_tools_returning_strings(self) -> None:
         server = SyncStringServer(["search", "read"])

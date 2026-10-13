@@ -44,14 +44,18 @@ async def _run(profiles: Sequence[CapabilityProfile]) -> int:
                 print(f"  ✗ {tool} expected but not exposed")
             for tool in sorted(violation.forbidden):
                 print(f"  ✗ {tool} unexpectedly exposed")
+            for tool in sorted(violation.undeclared):
+                print(f"  ✗ {tool} exposed but not declared")
             print()
             print("SECURITY REGRESSION")
-            for tool in sorted(violation.forbidden):
+            for tool in sorted(violation.forbidden | violation.undeclared):
                 print(f"  {profile.name} → {tool}")
         else:
             print(profile.name)
             print(f"  ✓ {len(profile.must_expose)} expected tool(s) exposed")
             print(f"  ✓ {len(profile.must_not_expose)} destructive tool(s) hidden")
+            if profile.strict:
+                print("  ✓ no undeclared tool(s) exposed")
     return exit_code
 
 

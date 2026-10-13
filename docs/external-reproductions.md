@@ -14,7 +14,7 @@ that milestone, not evidence it has happened.
 The Airbyte row concerns a reusable library, not a production connector. The
 Workspace row covers Gmail and Drive registration rather than the entire server
 startup path. All policies declare particular required/forbidden names; new or
-undeclared tools are not automatically prohibited. Execution authorization needs
+undeclared tools are not automatically prohibited unless a profile sets `strict=True`. Execution authorization needs
 its own tests.
 
 ## What to report

@@ -47,6 +47,28 @@ class TestCapabilityProfileCheck:
         with pytest.raises(CapabilityViolation):
             profile.check_sync()
 
+    async def test_strict_profile_rejects_undeclared_tool(self) -> None:
+        profile = CapabilityProfile(
+            name="readonly",
+            factory=lambda _settings: SyncStringServer(["search", "export"]),
+            settings=None,
+            must_expose=frozenset({"search"}),
+            strict=True,
+        )
+        with pytest.raises(CapabilityViolation) as exc_info:
+            await profile.check()
+        assert exc_info.value.undeclared == {"export"}
+
+    async def test_profile_is_not_strict_by_default(self) -> None:
+        profile = CapabilityProfile(
+            name="readonly",
+            factory=lambda _settings: SyncStringServer(["search", "export"]),
+            settings=None,
+            must_expose=frozenset({"search"}),
+        )
+        assert profile.strict is False
+        await profile.check()
+
     def test_profile_is_frozen(self) -> None:
         profile = CapabilityProfile(
             name="readonly",
