@@ -13,7 +13,7 @@ def _run_from_fixtures_dir(monkeypatch: pytest.MonkeyPatch) -> None:
     # their project directory, not with the fixtures dir pre-added to
     # sys.path. This is what catches the "cwd isn't importable" class of bug.
     monkeypatch.chdir("tests/fixtures")
-    for name in ("passing_profiles", "failing_profiles"):
+    for name in ("passing_profiles", "failing_profiles", "strict_profiles"):
         sys.modules.pop(name, None)
 
 
@@ -33,6 +33,22 @@ def test_check_exits_one_when_a_profile_violates_boundary(
     out = capsys.readouterr().out
     assert "SECURITY REGRESSION" in out
     assert "readonly → delete" in out
+
+
+def test_check_exits_one_when_a_strict_profile_exposes_an_undeclared_tool(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    exit_code = main(["check", "--profiles", "strict_profiles:load"])
+    assert exit_code == 1
+    out = capsys.readouterr().out
+    assert "export exposed but not declared" in out
+    assert "readonly-strict → export" in out
+
+
+def test_check_reports_strict_success(capsys: pytest.CaptureFixture[str]) -> None:
+    exit_code = main(["check", "--profiles", "strict_profiles:load_passing"])
+    assert exit_code == 0
+    assert "no undeclared tool(s) exposed" in capsys.readouterr().out
 
 
 def test_check_raises_a_clear_error_for_an_unimportable_module(

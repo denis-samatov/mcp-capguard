@@ -16,7 +16,8 @@ class CapabilityProfile:
 
     Build the server with ``factory(settings)`` (optionally unwrapped with
     ``accessor``), then assert the resulting tool surface exposes every tool
-    in ``must_expose`` and none in ``must_not_expose``.
+    in ``must_expose`` and none in ``must_not_expose``. With ``strict=True``,
+    any exposed tool not listed in ``must_expose`` is also a violation.
     """
 
     name: str
@@ -25,6 +26,7 @@ class CapabilityProfile:
     must_expose: frozenset[str] = field(default_factory=frozenset)
     must_not_expose: frozenset[str] = field(default_factory=frozenset)
     accessor: Callable[[Any], Any] | None = None
+    strict: bool = False
 
     async def check(self) -> None:
         """Run the boundary check. Raises ``CapabilityViolation`` on
@@ -37,6 +39,7 @@ class CapabilityProfile:
             must_expose=self.must_expose,
             must_not_expose=self.must_not_expose,
             profile_name=self.name,
+            strict=self.strict,
         )
 
     def check_sync(self) -> None:

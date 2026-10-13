@@ -68,10 +68,15 @@ def assert_capability_boundary(
     must_expose: Iterable[str] = (),
     must_not_expose: Iterable[str] = (),
     profile_name: str | None = None,
+    strict: bool = False,
 ) -> None:
     """Assert that ``exposed`` satisfies the capability boundary: every tool
     in ``must_expose`` is present, and no tool in ``must_not_expose`` is
     present.
+
+    With ``strict=True`` the boundary is a closed allowlist: every exposed
+    tool must also be listed in ``must_expose``. Undeclared tools are
+    reported separately from forbidden ones.
 
     ``exposed`` may be plain strings or tool-like objects with a ``.name``
     attribute (e.g. ``mcp.types.Tool``).
@@ -85,11 +90,13 @@ def assert_capability_boundary(
 
     missing = must_expose_set - exposed_names
     forbidden = must_not_expose_set & exposed_names
+    undeclared = exposed_names - must_expose_set - must_not_expose_set if strict else set()
 
-    if missing or forbidden:
+    if missing or forbidden or undeclared:
         raise CapabilityViolation(
             profile_name=profile_name,
             missing=missing,
             forbidden=forbidden,
             exposed=exposed_names,
+            undeclared=undeclared,
         )

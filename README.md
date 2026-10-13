@@ -67,8 +67,11 @@ schemas or behavior. The permission test follows the same pattern as
 [`check_tool_matrix.py`](https://github.com/denis-samatov/yandex-workspace-mcp/blob/main/scripts/check_tool_matrix.py)
 in `yandex-workspace-mcp`; this library makes that pattern reusable.
 
-Only declared requirements and prohibitions are checked. An undeclared tool is
-allowed; keep the policy current when adding tools. Tool exposure checks do not
+By default only declared requirements and prohibitions are checked. An undeclared
+tool is allowed; keep the policy current when adding tools. Set `strict=True` on a
+`CapabilityProfile` (or pass it to `assert_capability_boundary`) to treat the policy
+as a closed allowlist: every exposed tool must then be listed in `must_expose`, and
+any other tool fails as "exposed but not declared". Tool exposure checks do not
 replace runtime authorization tests.
 
 ## How it works
