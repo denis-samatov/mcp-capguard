@@ -57,6 +57,7 @@ def capguard_profiles() -> list[CapabilityProfile]:
     return [
         CapabilityProfile(
             name="readonly",
+            strict=True,
             factory=ClientVisibleTools,
             settings=Settings(),
             must_expose=frozenset({"list_items"}),
@@ -64,6 +65,7 @@ def capguard_profiles() -> list[CapabilityProfile]:
         ),
         CapabilityProfile(
             name="no-destructive",
+            strict=True,
             factory=ClientVisibleTools,
             settings=Settings(read_only=False, no_destructive=True),
             must_expose=frozenset({"list_items", "create_item"}),
@@ -71,6 +73,7 @@ def capguard_profiles() -> list[CapabilityProfile]:
         ),
         CapabilityProfile(
             name="explicit-exclusion",
+            strict=True,
             factory=ClientVisibleTools,
             settings=Settings(read_only=False, excluded_tools=("create_item", "delete_item")),
             must_expose=frozenset({"list_items"}),

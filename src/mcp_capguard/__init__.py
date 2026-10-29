@@ -1,5 +1,6 @@
-"""mcp_capguard: assert that an MCP server's configuration profile exposes
-exactly the tools it should, and none it shouldn't.
+"""mcp_capguard: check required and forbidden tools for a configuration profile.
+
+Use opt-in strict mode to reject every undeclared tool as well.
 
 Not a schema-drift tool (see ``mcpward``/``covenant-mcp`` for that) — a
 permission/capability boundary tester. No baseline snapshot required: it

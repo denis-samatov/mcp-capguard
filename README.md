@@ -41,7 +41,7 @@ Two reproducible examples exercise actual upstream factories with pinned commits
 
 - [Yandex Workspace MCP](examples/yandex_workspace_pilot/README.md): MCP SDK 2.3.0,
   readonly, editor without deletion, and disabled services.
-- [MCP Atlassian](examples/mcp_atlassian_pilot/README.md): FastMCP 3.4.8 / MCP SDK 1.30.0,
+- [MCP Atlassian](examples/mcp_atlassian_pilot/README.md): FastMCP 3.4.10 / MCP SDK 1.30.0,
   readonly, readwrite, and a two-tool allowlist, using an in-memory client adapter
   to include request-time tool filtering.
 
@@ -73,6 +73,11 @@ tool is allowed; keep the policy current when adding tools. Set `strict=True` on
 as a closed allowlist: every exposed tool must then be listed in `must_expose`, and
 any other tool fails as "exposed but not declared". Tool exposure checks do not
 replace runtime authorization tests.
+
+**Version boundary:** strict mode is source-only until the next release. The
+published v0.1.2 wheel does not contain this API; install a reviewed source SHA
+when using `strict=True`. Do not use the v0.1.2 installation command below and
+assume every example from the default branch is available in that wheel.
 
 ## How it works
 
@@ -201,12 +206,12 @@ capguard check --profiles conftest:capguard_profiles
 
 ## API reference
 
-- **`CapabilityProfile(name, factory, settings, must_expose=frozenset(), must_not_expose=frozenset(), accessor=None)`**
+- **`CapabilityProfile(name, factory, settings, must_expose=frozenset(), must_not_expose=frozenset(), accessor=None, strict=False)`**
   — a declarative profile. `.check()` (async) and `.check_sync()` run it.
 - **`get_exposed_tool_names(factory, settings, *, accessor=None) -> set[str]`**
   — the low-level introspection primitive, usable directly without the
   profile/plugin machinery.
-- **`assert_capability_boundary(exposed, *, must_expose=(), must_not_expose=(), profile_name=None)`**
+- **`assert_capability_boundary(exposed, *, must_expose=(), must_not_expose=(), profile_name=None, strict=False)`**
   — the assertion primitive. Raises `CapabilityViolation` (an
   `AssertionError` subclass) carrying `.missing`, `.forbidden`, and
   `.exposed` as sets, so tooling can render its own report instead of
@@ -227,3 +232,7 @@ capguard check --profiles conftest:capguard_profiles
 ## License
 
 MIT
+
+The source test environment requires pytest >=9.0.3 to exclude the vulnerable
+older tmpdir handling (GHSA-6w46-j5rx-g56g). The SDK examples use MCP >=2.3.
+This is a local source change awaiting an explicitly authorized release.

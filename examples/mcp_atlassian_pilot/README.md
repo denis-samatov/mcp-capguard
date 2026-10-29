@@ -1,8 +1,16 @@
 # MCP Atlassian pilot
 
+> Offline-only qualification: the pinned upstream package requires `cryptography<47`,
+> while current advisories require newer fixed versions. This dependency conflict
+> remains unresolved upstream. Do not use this pilot environment to host a service
+> or process untrusted certificates/PKCS#7 inputs. Passing TCP-blocked exposure
+> tests does not qualify cryptographic paths. See
+> [GHSA-g6cj-pr64-35w5](https://github.com/advisories/GHSA-g6cj-pr64-35w5) and
+> [GHSA-jwv3-5hgf-82ww](https://github.com/advisories/GHSA-jwv3-5hgf-82ww).
+
 This checks the real
 [`sooperset/mcp-atlassian`](https://github.com/sooperset/mcp-atlassian/tree/0a5d2427144d72f5aade07d4fabd385421cec401)
-server at a pinned commit with FastMCP 3.4.8 and MCP SDK 1.30.0.
+server at a pinned commit with the versions in `requirements.txt` (historical run: FastMCP 3.4.8 / MCP SDK 1.30.0).
 Use a **separate Python 3.12 environment**: the capguard development extra and
 Yandex pilot use SDK 2.x, which is incompatible with this upstream server.
 
@@ -55,3 +63,14 @@ Only placeholder credentials are supplied. No Jira/Confluence tools are called.
 The pytest configuration blocks TCP sockets, including outbound API requests.
 This tests tool exposure, not tool execution or runtime authorization. The pilot
 is maintained here; it does not imply endorsement or adoption by upstream.
+
+## Dependency update
+
+The requirements now select FastMCP 3.4.10 to address the upstream advisory range.
+Earlier recorded results for 3.4.8 remain historical; installation and offline
+compatibility must be rechecked for this revised environment. These tests do not
+qualify OAuth credentials or live upstream services.
+
+Local remediation check (2026-10-29): Python 3.12.14, FastMCP 3.4.10 / MCP SDK 1.30.0,
+`python -m pytest -q`: 4 passed with TCP blocked by pytest-socket. This
+checks tool exposure and negative controls, not live provider authorization.

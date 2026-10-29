@@ -50,6 +50,13 @@ jobs:
                   "        profile.check_sync()\n"
                   "    except CapabilityViolation as exc:\n"
                   "        print(exc.forbidden)\n"
+                  "from mcp_capguard import assert_capability_boundary\n"
+                  "try:\n"
+                  "    assert_capability_boundary({'read', 'new_export'}, must_expose={'read'}, strict=True)\n"
+                  "except CapabilityViolation as exc:\n"
+                  "    assert exc.undeclared == {'new_export'}\n"
+                  "else:\n"
+                  "    raise AssertionError('Installed wheel accepted undeclared tool')\n"
               )
               subprocess.run(
                   [str(python), "-m", "mypy", "--no-incremental", str(consumer)],
