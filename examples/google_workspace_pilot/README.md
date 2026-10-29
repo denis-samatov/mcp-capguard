@@ -43,3 +43,14 @@ dependencies are resolved on installation, so report installed versions too.
 This tests tool visibility, not OAuth consent, live API compatibility, or execution
 authorization. The subprocess is an example-owned adapter, not a new capguard core
 transport. Successful local runs do not establish independent upstream adoption.
+
+## Dependency update
+
+The requirements now select FastMCP 4.1.2 to address the upstream advisory range.
+Earlier recorded results for 4.0.10 remain historical; installation and offline
+compatibility must be rechecked for this revised environment. These tests do not
+qualify OAuth credentials or live upstream services.
+
+Local remediation check (2026-10-29): Python 3.12.14, FastMCP 4.1.2 / MCP SDK 2.3.0,
+`python -m pytest -q`: 4 passed with TCP blocked by pytest-socket. This
+checks tool exposure and negative controls, not live provider authorization.

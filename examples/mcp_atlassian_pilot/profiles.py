@@ -69,6 +69,7 @@ def capguard_profiles() -> list[CapabilityProfile]:
         ),
         CapabilityProfile(
             name="two-tool-allowlist",
+            strict=True,
             factory=ClientVisibleTools,
             settings=Settings(read_only=False, enabled_tools=allowed),
             must_expose=frozenset(allowed),
