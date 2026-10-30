@@ -1,6 +1,7 @@
-# Offline tool-listing test environment only. Upstream currently requires cryptography<47;
-# advisory-matched cryptography remains a blocker for live hosting, see README.md.
-mcp-atlassian @ git+https://github.com/sooperset/mcp-atlassian.git@0a5d2427144d72f5aade07d4fabd385421cec401
+# Isolated, hash-locked offline tool-exposure test profile (Python 3.12).
+# Upstream 0.23.1 removes the old cryptography<47 constraint.
+mcp-atlassian==0.23.1
+cryptography>=50.0.0
 fastmcp==3.4.10
 mcp==1.30.0
 pytest-socket==0.8.0

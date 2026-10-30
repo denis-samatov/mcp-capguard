@@ -1,16 +1,15 @@
 # MCP Atlassian pilot
 
-> Offline-only qualification: the pinned upstream package requires `cryptography<47`,
-> while current advisories require newer fixed versions. This dependency conflict
-> remains unresolved upstream. Do not use this pilot environment to host a service
-> or process untrusted certificates/PKCS#7 inputs. Passing TCP-blocked exposure
-> tests does not qualify cryptographic paths. See
-> [GHSA-g6cj-pr64-35w5](https://github.com/advisories/GHSA-g6cj-pr64-35w5) and
-> [GHSA-jwv3-5hgf-82ww](https://github.com/advisories/GHSA-jwv3-5hgf-82ww).
+The current **offline exposure-test profile** uses MCP Atlassian 0.23.1 and
+`cryptography>=50.0.0`, captured with hashes in `requirements.lock`. This replaces
+the previous Git snapshot that required `cryptography<47`; no incompatible
+dependency override is used. The old constraint/advisory conflict is historical,
+not an approval for live hosting. Certificates, OAuth credentials and real
+Jira/Confluence tool calls remain outside these tests.
 
 This checks the real
-[`sooperset/mcp-atlassian`](https://github.com/sooperset/mcp-atlassian/tree/0a5d2427144d72f5aade07d4fabd385421cec401)
-server at a pinned commit with the versions in `requirements.txt` (historical run: FastMCP 3.4.8 / MCP SDK 1.30.0).
+[`sooperset/mcp-atlassian`](https://pypi.org/project/mcp-atlassian/0.23.1/)
+server at a pinned package version with the versions in `requirements.txt` (historical run: FastMCP 3.4.8 / MCP SDK 1.30.0).
 Use a **separate Python 3.12 environment**: the capguard development extra and
 Yandex pilot use SDK 2.x, which is incompatible with this upstream server.
 
@@ -18,7 +17,8 @@ From the capguard repository root (Linux/macOS, with `uv` installed):
 
 ```bash
 uv venv --python 3.12 .venv-atlassian
-uv pip install --python .venv-atlassian/bin/python -e . -r examples/mcp_atlassian_pilot/requirements.txt
+uv pip install --python .venv-atlassian/bin/python --require-hashes -r examples/mcp_atlassian_pilot/requirements.lock
+uv pip install --python .venv-atlassian/bin/python --no-deps -e .
 cd examples/mcp_atlassian_pilot
 ../../.venv-atlassian/bin/python -m pytest -q
 ../../.venv-atlassian/bin/capguard check --profiles profiles:capguard_profiles
@@ -74,3 +74,19 @@ qualify OAuth credentials or live upstream services.
 Local remediation check (2026-10-29): Python 3.12.14, FastMCP 3.4.10 / MCP SDK 1.30.0,
 `python -m pytest -q`: 4 passed with TCP blocked by pytest-socket. This
 checks tool exposure and negative controls, not live provider authorization.
+
+
+Qualification update (2026-10-30): Python 3.12.14, MCP Atlassian 0.23.1,
+FastMCP 3.4.10 / MCP 1.30.0 / cryptography 50.0.2: all four TCP-blocked
+profile/negative-control tests passed. The same checks passed with a locally
+built capguard wheel. Strict OSV audit of that installed environment reported
+no known vulnerabilities; this is a versioned dependency observation, not a
+cryptographic or live-service security certification.
+
+Regenerate the Linux/Python 3.12 lock from the repository root with:
+
+```sh
+uv pip compile examples/mcp_atlassian_pilot/requirements.txt --python-version 3.12 \
+  --python-platform x86_64-unknown-linux-gnu --generate-hashes \
+  --output-file examples/mcp_atlassian_pilot/requirements.lock
+```
