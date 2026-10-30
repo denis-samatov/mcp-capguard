@@ -86,3 +86,17 @@ revision, command, outcome, and sanitized output.
 - [Yandex factory at the tested commit](https://github.com/denis-samatov/yandex-workspace-mcp/blob/9146882088ed8528e5d245337ea27d0c6d570c97/src/yandex_workspace_mcp/server.py)
 - [Atlassian request filtering at the tested commit](https://github.com/sooperset/mcp-atlassian/blob/0a5d2427144d72f5aade07d4fabd385421cec401/src/mcp_atlassian/servers/main.py)
 - [Pilot implementation and CI](https://github.com/denis-samatov/mcp-capguard/pull/4)
+
+
+## Maintained Atlassian profile — 2026-10-30
+
+The table and commit links above describe the original pilot snapshot. The
+maintained pilot now installs `mcp-atlassian==0.23.1` with `cryptography>=50.0.0`
+from a generated Python 3.12/Linux hash lock. An ordinary isolated resolver
+selected cryptography 50.0.2 without overriding the old upstream `<47` constraint.
+The new upstream profile still exposed 98 registered tools, 58 readonly tools
+and the same two declared allowlist tools in the TCP-blocked in-memory check.
+Four actual profile/negative-control tests passed using the built capguard wheel.
+No Jira/Confluence request or tool execution was performed. See the
+[pilot instructions](../examples/mcp_atlassian_pilot/README.md) for reproducible
+commands and the distinction between exposure checks and runtime authorization.

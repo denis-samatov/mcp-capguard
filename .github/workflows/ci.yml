@@ -82,7 +82,18 @@ jobs:
           python-version: "3.12"
       - run: python -m pip install uv
       - name: Install isolated server dependencies
-        run: uv pip install --system --python python -e . -r examples/${{ matrix.pilot }}/requirements.txt
+        run: |
+          if [ "${{ matrix.pilot }}" = "mcp_atlassian_pilot" ]; then
+            uv pip install --system --python python --require-hashes -r examples/mcp_atlassian_pilot/requirements.lock
+            uv pip install --system --python python --no-deps -e .
+          else
+            uv pip install --system --python python -e . -r examples/${{ matrix.pilot }}/requirements.txt
+          fi
+      - name: Audit the locked Atlassian dependency profile
+        if: matrix.pilot == 'mcp_atlassian_pilot'
+        run: |
+          python -m pip install pip-audit==2.10.1
+          python -m pip_audit --strict --disable-pip --require-hashes --vulnerability-service osv -r examples/mcp_atlassian_pilot/requirements.lock
       - name: Check profiles and reject intentional write exposure without TCP access
         working-directory: examples/${{ matrix.pilot }}
         run: python -m pytest -v
