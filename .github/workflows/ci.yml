@@ -19,7 +19,7 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: ruff check src tests examples
       - run: ruff format --check src tests examples
-      - run: mypy src/mcp_capguard
+      - run: mypy --strict src/mcp_capguard
       - run: pytest -q
       - name: Run the FastMCP example (dogfooding)
         working-directory: examples/fastmcp_example
@@ -31,6 +31,7 @@ jobs:
           python - <<'PY'
           import pathlib
           import subprocess
+          import shutil
           import tempfile
           import venv
 
@@ -41,28 +42,23 @@ jobs:
               python = root / "venv" / "bin" / "python"
               subprocess.run([str(python), "-m", "pip", "install", str(wheel), "mypy"], check=True)
               consumer = root / "consumer.py"
-              consumer.write_text(
-                  "from importlib.metadata import version\n"
-                  "from mcp_capguard import CapabilityProfile, CapabilityViolation, __version__\n"
-                  "assert __version__ == version('mcp-capguard')\n"
-                  "def verify(profile: CapabilityProfile) -> None:\n"
-                  "    try:\n"
-                  "        profile.check_sync()\n"
-                  "    except CapabilityViolation as exc:\n"
-                  "        print(exc.forbidden)\n"
-                  "from mcp_capguard import assert_capability_boundary\n"
-                  "try:\n"
-                  "    assert_capability_boundary({'read', 'new_export'}, must_expose={'read'}, strict=True)\n"
-                  "except CapabilityViolation as exc:\n"
-                  "    assert exc.undeclared == {'new_export'}\n"
-                  "else:\n"
-                  "    raise AssertionError('Installed wheel accepted undeclared tool')\n"
-              )
+              shutil.copyfile("tests/fixtures/typed_release_consumer.py", consumer)
               subprocess.run(
-                  [str(python), "-m", "mypy", "--no-incremental", str(consumer)],
+                  [str(python), "-m", "mypy", "--strict", "--no-incremental", str(consumer)],
                   cwd=root, check=True,
               )
               subprocess.run([str(python), str(consumer)], cwd=root, check=True)
+              invalid = root / "invalid_consumer.py"
+              invalid.write_text(
+                  "from mcp_capguard import assert_capability_boundary\n"
+                  "assert_capability_boundary({'read'}, profile_name=123)\n"
+              )
+              rejected = subprocess.run(
+                  [str(python), "-m", "mypy", "--strict", "--no-incremental", str(invalid)],
+                  cwd=root, capture_output=True, text=True,
+              )
+              assert rejected.returncode == 1, rejected.stdout + rejected.stderr
+              assert "arg-type" in rejected.stdout, rejected.stdout + rejected.stderr
           PY
 
   isolated-compatibility-examples:

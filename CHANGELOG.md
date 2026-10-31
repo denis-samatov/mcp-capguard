@@ -1,11 +1,17 @@
 # Changelog
 
-## Unreleased
+## 0.2.0rc1 — unpublished release candidate (2026-10-31)
 
 - Add an opt-in strict mode (`CapabilityProfile(strict=True)` /
   `assert_capability_boundary(..., strict=True)`) that treats `must_expose` as a
   closed allowlist and reports undeclared exposed tools separately. Default
   behavior is unchanged.
+- Keep existing required/forbidden/profile APIs and CLI defaults compatible with
+  the published GitHub 0.1.2 wheel. This candidate is not a PyPI publication.
+- Verify an installed wheel with a strict external typed consumer and real
+  default/strict boundary checks; document previous-wheel upgrade acceptance.
+- Maintain the isolated Atlassian pilot on a compatible released upstream and
+  complete audited hash profile; this checks exposure, not runtime authorization.
 
 ## 0.1.2
 
