@@ -74,10 +74,12 @@ as a closed allowlist: every exposed tool must then be listed in `must_expose`, 
 any other tool fails as "exposed but not declared". Tool exposure checks do not
 replace runtime authorization tests.
 
-**Version boundary:** strict mode is source-only until the next release. The
-published v0.1.2 wheel does not contain this API; install a reviewed source SHA
-when using `strict=True`. Do not use the v0.1.2 installation command below and
-assume every example from the default branch is available in that wheel.
+**Version boundary:** strict mode is included in the unpublished `0.2.0rc1`
+release candidate. The published GitHub v0.1.2 wheel does not contain this API;
+use a reviewed source SHA or a locally built candidate wheel for `strict=True`.
+The v0.1.2 installation command below remains the previous published version.
+See [release acceptance](RELEASING.md) for external typed-consumer and upgrade
+checks. No PyPI release is currently advertised.
 
 ## How it works
 
@@ -154,6 +156,7 @@ python -m pip install -e '.[dev]'
 ```python
 from mcp_capguard import CapabilityProfile
 from myserver import create_app, Settings
+
 
 def capguard_profiles() -> list[CapabilityProfile]:
     return [

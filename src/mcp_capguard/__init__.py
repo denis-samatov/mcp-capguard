@@ -18,4 +18,4 @@ __all__ = [
     "get_exposed_tool_names",
 ]
 
-__version__ = "0.1.2"
+__version__ = "0.2.0rc1"

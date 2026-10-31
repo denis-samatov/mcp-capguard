@@ -7,6 +7,7 @@ profile, each failure naming its specific profile.
 from __future__ import annotations
 
 import importlib
+from typing import cast
 
 import pytest
 
@@ -61,4 +62,5 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
 
 @pytest.fixture
 def capguard_profile(request: pytest.FixtureRequest) -> CapabilityProfile:
-    return request.param
+    # pytest_generate_tests parametrizes values validated by _resolve_profiles.
+    return cast(CapabilityProfile, request.param)
