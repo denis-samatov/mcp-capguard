@@ -2,28 +2,27 @@
 
 [![CI](https://github.com/denis-samatov/mcp-capguard/actions/workflows/ci.yml/badge.svg)](https://github.com/denis-samatov/mcp-capguard/actions/workflows/ci.yml)
 
-**Test required and forbidden MCP tools for each configuration profile.**
-A pytest plugin for permission/capability boundaries.
+**Test which MCP tools each configuration profile exposes.** Use pytest or the
+CLI to catch missing required tools and unexpected access in CI.
 
-```python
-def test_readonly_hides_destructive_tools(capguard_profile):
-    capguard_profile.check_sync()
-```
-
-## The problem this solves
-
-Any MCP server that gates tools behind settings — read-only vs. read-write,
-authenticated vs. not, feature flags — can silently regress: a refactor adds
-a new write tool, and it leaks into a profile that was supposed to stay
-read-only. Nothing throws. The agent just gets a tool it shouldn't have.
-
-capguard turns that into a CI failure, checked fresh on every run — no
-prior snapshot required.
+[Run the demo](#see-the-regression-in-one-minute) ·
+[Quick start](#quick-start) ·
+[Real-server pilots](#pilots-with-real-servers) ·
+[API reference](#api-reference)
 
 ## See the regression in one minute
 
-The [runnable MCP SDK demo](examples/fastmcp_example/README.md) shows a passing
-readonly profile and the same policy rejecting an intentionally leaked delete tool:
+The [runnable MCP SDK demo](examples/fastmcp_example/README.md) checks a read-only
+profile twice. The second run deliberately exposes `delete_document` under the
+same policy.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readonly-demo-dark.png">
+  <img src="docs/assets/readonly-demo-light.png" alt="Two demo runs. The read-only profile passes with exit code 0. A simulated regression exposes delete_document and fails with exit code 1.">
+</picture>
+
+From the repository root, install the development dependencies and run both
+variants. The demo runs locally without credentials or a running server.
 
 ```bash
 python -m pip install -e '.[dev]'
@@ -31,33 +30,39 @@ python examples/fastmcp_example/demo.py
 python examples/fastmcp_example/demo.py --leak-delete
 ```
 
-The normal demo exits `0`; the `--leak-delete` demo exits `1` and names `delete_document`.
-Run these from the repository root after cloning it. No API keys or running
-server are needed.
+The first run exits `0`. The second is expected to exit `1` and report
+`delete_document` as unexpectedly exposed. See the [demo walkthrough](docs/demo-walkthrough.md)
+for a pinned revision and the full transcript.
 
-## Pilots with real servers
+## The problem this solves
 
-Two reproducible examples exercise actual upstream factories with pinned commits:
+A read-only MCP profile can accidentally expose a write tool after a configuration
+change or a refactor. Declare which tools the profile must expose and which it
+must hide. capguard checks that policy on every run.
 
-- [Yandex Workspace MCP](examples/yandex_workspace_pilot/README.md): MCP SDK 2.3.0,
-  readonly, editor without deletion, and disabled services.
-- [MCP Atlassian](examples/mcp_atlassian_pilot/README.md): FastMCP 3.4.10 / MCP SDK 1.30.0,
-  readonly, readwrite, and a two-tool allowlist, using an in-memory client adapter
-  to include request-time tool filtering.
+## How it works
 
-Each pilot runs in its own Python 3.12 environment, checks three profiles, and
-proves the same policy rejects an intentionally enabled write capability.
-Their pytest runs block TCP sockets and require no real credentials. These are
-compatibility examples, not evidence of independent upstream adoption.
+For each profile, capguard passes your settings to the server factory, reads
+the tool names from `list_tools()` and checks them against the profile policy.
+The core runs in process. A custom `list_tools()` adapter can isolate an upstream
+server in a worker, as the Google Workspace example does for its global registry.
+Runtime depends on your factory and its tool-listing implementation.
 
-Read the [practical write-up on choosing the client-visible boundary](docs/client-visible-tools.md).
-For two additional adapters and a three-project reproduction shortlist, see
-[external reproduction scenarios](docs/external-reproductions.md): real Gmail/Drive
-tools from Google Workspace MCP and Airbyte's filter library with local stub tools.
-If you reproduce a pilot or try capguard on your own server,
-[share a compatibility report](https://github.com/denis-samatov/mcp-capguard/issues/new?template=compatibility-report.yml)
-with your versions, command and outcome. Successful runs and installation failures
-are both useful.
+If filtering happens at request time, use a `list_tools()` adapter that retrieves
+the client-visible list. The Atlassian pilot demonstrates this with an in-memory
+FastMCP Client. Listing an unfiltered internal registry would test the wrong boundary.
+
+Your server only needs to satisfy one contract:
+
+```python
+def factory(settings: Any) -> Any: ...  # returns a server with .list_tools()
+```
+
+`list_tools()` can be sync or async, and can return either plain strings or
+tool objects with a `.name` attribute (like `mcp.types.Tool`). If your
+factory returns a wrapper object (e.g. an `Application` whose real server
+lives at `.mcp_server`), pass `accessor=lambda app: app.mcp_server` — explicit,
+not guessed.
 
 ## Scope
 
@@ -80,30 +85,6 @@ use a reviewed source SHA or a locally built candidate wheel for `strict=True`.
 The v0.1.2 installation command below remains the previous published version.
 See [release acceptance](RELEASING.md) for external typed-consumer and upgrade
 checks. No PyPI release is currently advertised.
-
-## How it works
-
-capguard imports your server factory and calls it directly with different settings
-objects, the same way your own test suite would. Its core provides no process or
-transport management. A custom `list_tools()` adapter can isolate an upstream
-server in a worker, as the Google Workspace example does for its global registry.
-Runtime depends on your factory and its tool-listing implementation.
-
-If filtering happens at request time, use a `list_tools()` adapter that retrieves
-the client-visible list. The Atlassian pilot demonstrates this with an in-memory
-FastMCP Client. Listing an unfiltered internal registry would test the wrong boundary.
-
-Your server only needs to satisfy one contract:
-
-```python
-def factory(settings: Any) -> Any: ...  # returns a server with .list_tools()
-```
-
-`list_tools()` can be sync or async, and can return either plain strings or
-tool objects with a `.name` attribute (like `mcp.types.Tool`). If your
-factory returns a wrapper object (e.g. an `Application` whose real server
-lives at `.mcp_server`), pass `accessor=lambda app: app.mcp_server` — explicit,
-not guessed.
 
 ## Install a released wheel
 
@@ -207,6 +188,30 @@ For CI systems that don't run pytest directly:
 capguard check --profiles conftest:capguard_profiles
 ```
 
+## Pilots with real servers
+
+Two reproducible examples exercise actual upstream factories with pinned commits:
+
+- [Yandex Workspace MCP](examples/yandex_workspace_pilot/README.md): MCP SDK 2.3.0,
+  readonly, editor without deletion, and disabled services.
+- [MCP Atlassian](examples/mcp_atlassian_pilot/README.md): FastMCP 3.4.10 / MCP SDK 1.30.0,
+  readonly, readwrite, and a two-tool allowlist, using an in-memory client adapter
+  to include request-time tool filtering.
+
+Each pilot runs in its own Python 3.12 environment, checks three profiles, and
+proves the same policy rejects an intentionally enabled write capability.
+Their pytest runs block TCP sockets and require no real credentials. These are
+compatibility examples, not evidence of independent upstream adoption.
+
+Read the [practical write-up on choosing the client-visible boundary](docs/client-visible-tools.md).
+For two additional adapters and a three-project reproduction shortlist, see
+[external reproduction scenarios](docs/external-reproductions.md): real Gmail/Drive
+tools from Google Workspace MCP and Airbyte's filter library with local stub tools.
+If you reproduce a pilot or try capguard on your own server,
+[share a compatibility report](https://github.com/denis-samatov/mcp-capguard/issues/new?template=compatibility-report.yml)
+with your versions, command and outcome. Successful runs and installation failures
+are both useful.
+
 ## API reference
 
 - **`CapabilityProfile(name, factory, settings, must_expose=frozenset(), must_not_expose=frozenset(), accessor=None, strict=False)`**
@@ -216,9 +221,8 @@ capguard check --profiles conftest:capguard_profiles
   profile/plugin machinery.
 - **`assert_capability_boundary(exposed, *, must_expose=(), must_not_expose=(), profile_name=None, strict=False)`**
   — the assertion primitive. Raises `CapabilityViolation` (an
-  `AssertionError` subclass) carrying `.missing`, `.forbidden`, and
-  `.exposed` as sets, so tooling can render its own report instead of
-  parsing a message string.
+  `AssertionError` subclass) with sets for `.missing`, `.forbidden`,
+  `.undeclared` and `.exposed` in the source version.
 
 ## What this doesn't do (yet)
 
@@ -231,11 +235,6 @@ capguard check --profiles conftest:capguard_profiles
   secrets and validators that don't round-trip through YAML safely; you
   construct them in Python, same as any other test fixture.
 
-
 ## License
 
-MIT
-
-The source test environment requires pytest >=9.0.3 to exclude the vulnerable
-older tmpdir handling (GHSA-6w46-j5rx-g56g). The SDK examples use MCP >=2.3.
-This is a local source change awaiting an explicitly authorized release.
+[MIT](LICENSE).
