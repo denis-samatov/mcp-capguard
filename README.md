@@ -79,6 +79,10 @@ as a closed allowlist: every exposed tool must then be listed in `must_expose`, 
 any other tool fails as "exposed but not declared". Tool exposure checks do not
 replace runtime authorization tests.
 
+The example in [Agent Research Commons #125](https://github.com/mbabby/agent-research-commons/issues/125)
+checks tool exposure using synthetic lists of tool names. Invocation authorization
+requires separate tests that exercise actual tool calls.
+
 **Version boundary:** strict mode is included in the unpublished `0.2.0rc1`
 release candidate. The published GitHub v0.1.2 wheel does not contain this API;
 use a reviewed source SHA or a locally built candidate wheel for `strict=True`.
