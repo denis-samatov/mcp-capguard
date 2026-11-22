@@ -239,6 +239,10 @@ are both useful.
   secrets and validators that don't round-trip through YAML safely; you
   construct them in Python, same as any other test fixture.
 
+## Related project
+
+The [Agent Reliability Platform](https://github.com/denis-samatov/agent-reliability-platform) uses capguard to check the tools exposed to each principal in a multi-tenant agent workflow.
+
 ## License
 
 [MIT](LICENSE).
