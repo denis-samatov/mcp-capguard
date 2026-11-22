@@ -5,10 +5,19 @@
 **Test which MCP tools each configuration profile exposes.** Use pytest or the
 CLI to catch missing required tools and unexpected access in CI.
 
-[Run the demo](#see-the-regression-in-one-minute) ·
-[Quick start](#quick-start) ·
-[Real-server pilots](#pilots-with-real-servers) ·
-[API reference](#api-reference)
+<p align="center">
+  <a href="#see-the-regression-in-one-minute"><img alt="One-minute demo" src="https://img.shields.io/badge/One--minute%20demo-0F766E?style=for-the-badge" height="32"></a>
+  <a href="#quick-start"><img alt="Use with pytest" src="https://img.shields.io/badge/Use%20with%20pytest-1D4ED8?style=for-the-badge" height="32"></a>
+  <a href="#pilots-with-real-servers"><img alt="Real-server pilots" src="https://img.shields.io/badge/Real--server%20pilots-475569?style=for-the-badge" height="32"></a>
+  <a href="#api-reference"><img alt="API reference" src="https://img.shields.io/badge/API%20reference-6D28D9?style=for-the-badge" height="32"></a>
+</p>
+
+<details>
+<summary>Read a failed capability check</summary>
+
+A failure identifies a tool that should be present, a tool that should be hidden, or an undeclared tool when using strict mode in the source version. Start with the [paired demo transcript](docs/demo-walkthrough.md) to compare the passing and failing profiles. [Real-server pilots](#pilots-with-real-servers) show how to collect the tool list observed by a client.
+
+</details>
 
 ## See the regression in one minute
 
